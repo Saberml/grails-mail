@@ -16,6 +16,7 @@
 
 import org.springframework.jndi.JndiObjectFactoryBean
 import org.springframework.mail.javamail.JavaMailSenderImpl
+import grails.spring.BeanBuilder
 
 import grails.plugin.mail.*
 
@@ -103,13 +104,11 @@ sendMail {
 
 			event.ctx.getBean(MailService.class).setPoolSize(mailConfig.poolSize?:null)
 
-            def newBeans = beans {
+            new BeanBuilder().beans {
                 configureMailSender(delegate, mailConfig)
-            }
+            }.registerBeans(event.ctx)
 
-            newBeans.beanDefinitions.each { name, definition ->
-                event.ctx.registerBeanDefinition(name, definition)
-            }
+            event.ctx.getBean('mailMessageBuilderFactory').mailSender = event.ctx.getBean('mailSender')
         }
     }
 
